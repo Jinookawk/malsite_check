@@ -53,7 +53,10 @@ static int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
             }
         }
         if(strstr(addr, malsite[i]) != NULL){
+            FILE *log = fopen("log.txt", "a");
+            fprintf(log, "Try to connect malsite: %s\n", addr);
             printf("Found!!\n");
+            fclose(log);
             return 0;
         }
         i++;

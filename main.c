@@ -15,10 +15,6 @@ static u_int32_t print_pkt (struct nfq_data *tb)
 {
     int id = 0;
     struct nfqnl_msg_packet_hdr *ph;
-    struct nfqnl_msg_packet_hw *hwph;
-    u_int32_t mark,ifi;
-    int ret;
-    unsigned char *data;
 
     ph = nfq_get_msg_packet_hdr(tb);
     if (ph) {
@@ -35,24 +31,24 @@ static int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
     printf("Connecting site : %s\n", (char *)data);
     FILE *mal = fopen("mal_site.txt", "r");
     char *site;
-    int buf_size=1024;
-    site=malloc(buf_size+1);
+    int buf_size = 1024;
+    site = malloc(buf_size + 1);
     char addr[200];
     char *malsite[200];
     int i=0, j=0;
     strcpy(addr, (char *)data);
 
     while(fgets(site, buf_size, mal)){
-        malsite[i]=malloc(strlen(site)+1);
-        strcpy(malsite[i], site+strlen("http://"));
+        malsite[i] = malloc(strlen(site) + 1);
+        strcpy(malsite[i], site + strlen("http://"));
         if(strstr(malsite[i], "www.") != NULL){
-            strcpy(malsite[i], malsite[i]+strlen("www."));
+            strcpy(malsite[i], malsite[i] + strlen("www."));
         }
-        int idx=strlen(malsite[i]);
-        malsite[i][idx-1]='\0';
+        int idx = strlen(malsite[i]);
+        malsite[i][idx-1] = '\0';
         for(idx=0; idx<strlen(malsite[i]); idx++){
-            if(malsite[i][idx]=='/' && malsite[i][idx+1]=='\0'){
-                malsite[i][idx]='\0';
+            if(malsite[i][idx] == '/' && malsite[i][idx+1] == '\0'){
+                malsite[i][idx] = '\0';
                 break;
             }
         }
@@ -63,7 +59,7 @@ static int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
         i++;
     }
 
-    for(j=0; j<i; j++)
+    for(j = 0; j < i; j++)
         free(malsite[j]);
 
     fclose(mal);
@@ -73,62 +69,62 @@ static int cb(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
 
 void dump(unsigned char* buf, size_t len, char *address) {
     size_t i;
-    unsigned char *test=buf;
+    unsigned char *data = buf;
 
     char phttp[5];
-    for(i=0; i<len; i++){
-        if(*test=='H'){
-            strncpy(phttp, (char *)test, 4);
-            phttp[4]='\0';
+    for(i = 0; i < len; i++){
+        if(*data == 'H'){
+            strncpy(phttp, (char *)data, 4);
+            phttp[4] = '\0';
             if(!strcmp(phttp, "HTTP")){
                 break;
             }
         }
-        test++;
+        data++;
     }
 
-    if(i==len){
+    if(i == len){
         strcpy(address, "Nothing");
         return;
     }
 
-    test=buf;
+    data = buf;
     char pget[4];
-    for(i=0; i<len; i++){
-        if(*test=='G'){
-            strncpy(pget, (char *)test, 3);
-            pget[3]='\0';
+    for(i = 0; i < len; i++){
+        if(*data == 'G'){
+            strncpy(pget, (char *)data, 3);
+            pget[3] = '\0';
             if(!strcmp(pget, "GET")){
                 break;
             }
         }
-        test++;
+        data++;
     }
-    unsigned char *findget=test+strlen("GET ");
+    unsigned char *findget = data + strlen("GET ");
 
-    test=buf;
+    data = buf;
     char phost[6];
-    for(i=0; i<len; i++){
-        if(*test=='H'){
-            strncpy(phost, (char *)test, 5);
-            phost[5]='\0';
+    for(i = 0; i < len; i++){
+        if(*data == 'H'){
+            strncpy(phost, (char *)data, 5);
+            phost[5] = '\0';
             if(!strcmp(phost, "Host:")){
                 break;
             }
         }
-        test++;
+        data++;
     }
-    unsigned char *findhost=test+strlen("Host: ");
+    unsigned char *findhost = data + strlen("Host: ");
 
     int idx=0;
-    while(*findhost!='\r'){
-        address[idx++]=*findhost++;
+    while(*findhost != '\r'){
+        address[idx++] = *findhost++;
     }
 
-    while(*findget!=' '){
-        address[idx++]=*findget++;
+    while(*findget != ' '){
+        address[idx++] = *findget++;
     }
-    address[idx]='\0';
+    address[idx] = '\0';
     fflush(stdout);
 }
 
